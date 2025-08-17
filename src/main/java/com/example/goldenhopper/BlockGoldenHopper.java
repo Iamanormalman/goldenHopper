@@ -2,17 +2,24 @@ package com.example.goldenhopper;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
-public class BlockGoldenHopper extends Block
+import java.util.Random;
+
+public class BlockGoldenHopper extends BlockContainer
 {
     @SideOnly(Side.CLIENT)
     private IIcon topIcon;
@@ -30,6 +37,12 @@ public class BlockGoldenHopper extends Block
         this.setResistance(8.0F);
         this.setStepSound(soundTypeMetal);
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    @Override
+    public TileEntity createNewTileEntity(World world, int metadata)
+    {
+        return new TileEntityGoldenHopper();
     }
 
     @Override
@@ -91,6 +104,16 @@ public class BlockGoldenHopper extends Block
                 // 不潛行或其他情況：默認向下
                 world.setBlockMetadataWithNotify(x, y, z, 0, 2);
             }
+
+            // 設置自定義名稱（如果物品有自定義名稱）
+            if (stack.hasDisplayName())
+            {
+                TileEntity tileEntity = world.getTileEntity(x, y, z);
+                if (tileEntity instanceof TileEntityGoldenHopper)
+                {
+                    ((TileEntityGoldenHopper)tileEntity).setCustomName(stack.getDisplayName());
+                }
+            }
         }
         else
         {
@@ -134,9 +157,84 @@ public class BlockGoldenHopper extends Block
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ)
     {
-        // 移除右鍵切換朝向的功能，保持原版行為
-        // 原版漏斗右鍵是打開GUI，我們這裡暫時不做任何事
-        return false;
+        if (world.isRemote)
+        {
+            return true;
+        }
+        else
+        {
+            TileEntity tileEntity = world.getTileEntity(x, y, z);
+            if (tileEntity instanceof TileEntityGoldenHopper)
+            {
+                player.openGui(GoldenHopper.instance, GuiHandler.GOLDEN_HOPPER_GUI_ID, world, x, y, z);
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public void onBlockPreDestroy(World world, int x, int y, int z, int metadata)
+    {
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
+
+        if (tileEntity instanceof TileEntityGoldenHopper)
+        {
+            TileEntityGoldenHopper hopperTileEntity = (TileEntityGoldenHopper)tileEntity;
+
+            for (int i = 0; i < hopperTileEntity.getSizeInventory(); ++i)
+            {
+                ItemStack itemstack = hopperTileEntity.getStackInSlot(i);
+
+                if (itemstack != null)
+                {
+                    float f = this.hopperRandom.nextFloat() * 0.8F + 0.1F;
+                    float f1 = this.hopperRandom.nextFloat() * 0.8F + 0.1F;
+                    float f2 = this.hopperRandom.nextFloat() * 0.8F + 0.1F;
+
+                    while (itemstack.stackSize > 0)
+                    {
+                        int j = this.hopperRandom.nextInt(21) + 10;
+
+                        if (j > itemstack.stackSize)
+                        {
+                            j = itemstack.stackSize;
+                        }
+
+                        itemstack.stackSize -= j;
+                        EntityItem entityitem = new EntityItem(world, (double)((float)x + f), (double)((float)y + f1), (double)((float)z + f2), new ItemStack(itemstack.getItem(), j, itemstack.getItemDamage()));
+
+                        if (itemstack.hasTagCompound())
+                        {
+                            entityitem.getEntityItem().setTagCompound((NBTTagCompound)itemstack.getTagCompound().copy());
+                        }
+
+                        float f3 = 0.05F;
+                        entityitem.motionX = (double)((float)this.hopperRandom.nextGaussian() * f3);
+                        entityitem.motionY = (double)((float)this.hopperRandom.nextGaussian() * f3 + 0.2F);
+                        entityitem.motionZ = (double)((float)this.hopperRandom.nextGaussian() * f3);
+                        world.spawnEntityInWorld(entityitem);
+                    }
+                }
+            }
+
+            world.func_147453_f(x, y, z, this);
+        }
+
+        super.onBlockPreDestroy(world, x, y, z, metadata);
+    }
+
+    private Random hopperRandom = new Random();
+
+    @Override
+    public boolean hasComparatorInputOverride()
+    {
+        return true;
+    }
+
+    @Override
+    public int getComparatorInputOverride(World world, int x, int y, int z, int side)
+    {
+        return Container.calcRedstoneFromInventory((IInventory)world.getTileEntity(x, y, z));
     }
 
     @Override
