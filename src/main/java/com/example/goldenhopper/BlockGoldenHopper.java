@@ -3,16 +3,13 @@ package com.example.goldenhopper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockHopper;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Facing;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public class BlockGoldenHopper extends Block
@@ -32,7 +29,7 @@ public class BlockGoldenHopper extends Block
         this.setHardness(3.0F);
         this.setResistance(8.0F);
         this.setStepSound(soundTypeMetal);
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
@@ -145,71 +142,16 @@ public class BlockGoldenHopper extends Block
     @Override
     public void addCollisionBoxesToList(net.minecraft.world.World world, int x, int y, int z, net.minecraft.util.AxisAlignedBB aabb, java.util.List list, net.minecraft.entity.Entity entity)
     {
-        // 完全模擬原版漏斗的碰撞箱，根據朝向調整漏嘴位置
-        int metadata = world.getBlockMetadata(x, y, z);
-        int direction = BlockHopper.getDirectionFromMetadata(metadata);
-
-        // 主漏斗體的碰撞箱 (10/16高度)
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
+        // 設置為完整一格高的碰撞箱
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
         super.addCollisionBoxesToList(world, x, y, z, aabb, list, entity);
-
-        // 根據方向設置漏嘴的碰撞箱
-        double spoutSize = 0.25; // 4/16
-        double spoutLength = 0.25; // 4/16
-
-        switch (direction)
-        {
-            case 0: // 向下
-                this.setBlockBounds(0.375F, -0.25F, 0.375F, 0.625F, 0.0F, 0.625F);
-                break;
-            case 2: // 向北 (Z-)
-                this.setBlockBounds(0.375F, 0.25F, 0.0F, 0.625F, 0.5F, 0.25F);
-                break;
-            case 3: // 向南 (Z+)
-                this.setBlockBounds(0.375F, 0.25F, 0.75F, 0.625F, 0.5F, 1.0F);
-                break;
-            case 4: // 向西 (X-)
-                this.setBlockBounds(0.0F, 0.25F, 0.375F, 0.25F, 0.5F, 0.625F);
-                break;
-            case 5: // 向東 (X+)
-                this.setBlockBounds(0.75F, 0.25F, 0.375F, 1.0F, 0.5F, 0.625F);
-                break;
-        }
-
-        super.addCollisionBoxesToList(world, x, y, z, aabb, list, entity);
-
-        // 重置邊界為主體
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
     }
 
     @Override
     public void setBlockBoundsBasedOnState(net.minecraft.world.IBlockAccess world, int x, int y, int z)
     {
-        // 設置選擇邊界包含整個漏斗結構
-        int metadata = world.getBlockMetadata(x, y, z);
-        int direction = BlockHopper.getDirectionFromMetadata(metadata);
-
-        switch (direction)
-        {
-            case 0: // 向下
-                this.setBlockBounds(0.0F, -0.25F, 0.0F, 1.0F, 0.625F, 1.0F);
-                break;
-            case 2: // 向北
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
-                break;
-            case 3: // 向南
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
-                break;
-            case 4: // 向西
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
-                break;
-            case 5: // 向東
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
-                break;
-            default:
-                this.setBlockBounds(0.0F, -0.25F, 0.0F, 1.0F, 0.625F, 1.0F);
-                break;
-        }
+        // 設置選擇邊界為完整一格
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
