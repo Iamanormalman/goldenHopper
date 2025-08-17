@@ -1,17 +1,15 @@
 package com.example.goldenhopper;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Facing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -368,13 +366,12 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
             {
                 // 只允許放入藥水瓶相關物品
                 return stack.getItem() == net.minecraft.init.Items.potionitem ||
-                        stack.getItem() == net.minecraft.init.Items.glass_bottle ||
-                        stack.getItem() == net.minecraft.init.Items.water_bottle;
+                        stack.getItem() == net.minecraft.init.Items.glass_bottle;
             }
             else if (slot == 3) // 材料槽
             {
-                // 允許放入釀造材料
-                return net.minecraft.tileentity.TileEntityBrewingStand.canBrew(null); // 簡化檢查
+                // 檢查是否為有效的釀造材料
+                return isValidBrewingIngredient(stack);
             }
         }
 
@@ -385,6 +382,30 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         }
 
         return true;
+    }
+
+    /**
+     * 檢查物品是否為有效的釀造材料
+     * 在 Minecraft 1.7.10 中的常見釀造材料
+     */
+    private static boolean isValidBrewingIngredient(ItemStack stack)
+    {
+        if (stack == null) return false;
+
+        // 常見的釀造材料
+        return stack.getItem() == net.minecraft.init.Items.nether_wart ||
+                stack.getItem() == net.minecraft.init.Items.redstone ||
+                stack.getItem() == net.minecraft.init.Items.glowstone_dust ||
+                stack.getItem() == net.minecraft.init.Items.gunpowder ||
+                stack.getItem() == net.minecraft.init.Items.golden_carrot ||
+                stack.getItem() == net.minecraft.init.Items.magma_cream ||
+                stack.getItem() == net.minecraft.init.Items.blaze_powder ||
+                stack.getItem() == net.minecraft.init.Items.ghast_tear ||
+                stack.getItem() == net.minecraft.init.Items.spider_eye ||
+                stack.getItem() == net.minecraft.init.Items.fermented_spider_eye ||
+                stack.getItem() == net.minecraft.init.Items.sugar ||
+                stack.getItem() == Items.speckled_melon ||
+                stack.getItem() == net.minecraft.init.Items.speckled_melon;
     }
 
     private static boolean canExtractItemFromSlot(IInventory inventory, ItemStack stack, int slot, int side)
@@ -488,7 +509,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
                 break;
         }
 
-        return getInventoryAtLocation(this.worldObj, (double)i, (double)j, (double)k);
+        return getInventoryAtLocation(this.worldObj, i, j, k);
     }
 
     public static IInventory getSourceInventory(TileEntityGoldenHopper hopper)
