@@ -68,55 +68,69 @@ public class BlockGoldenHopper extends Block
     @Override
     public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
     {
-        // 完全模擬原版漏斗的放置邏輯
-        // 默認朝下
-        int hopperMetadata = 0;
-
-        // 檢查放置的面，如果在側面且符合條件，漏嘴朝向該面
-        if (side != 0 && side != 1) // 不是頂面或底面
-        {
-            // 將面ID轉換為漏斗的方向metadata
-            switch (side)
-            {
-                case 2: // 北面 (Z-)
-                    hopperMetadata = 2;
-                    break;
-                case 3: // 南面 (Z+)
-                    hopperMetadata = 3;
-                    break;
-                case 4: // 西面 (X-)
-                    hopperMetadata = 4;
-                    break;
-                case 5: // 東面 (X+)
-                    hopperMetadata = 5;
-                    break;
-                default:
-                    hopperMetadata = 0; // 默認向下
-                    break;
-            }
-        }
-
-        return hopperMetadata;
+        // 將點擊的面信息存儲在metadata中，稍後在onBlockPlacedBy中使用
+        // 我們使用metadata的高位來臨時存儲side信息
+        return side;
     }
 
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase placer, ItemStack stack)
     {
-        // 如果玩家沒有潛行，強制設置為向下
         if (placer instanceof EntityPlayer)
         {
             EntityPlayer player = (EntityPlayer) placer;
-            if (!player.isSneaking())
+
+            // 獲取從onBlockPlaced傳遞來的面信息
+            int placementSide = world.getBlockMetadata(x, y, z);
+
+            if (player.isSneaking() && isValidSideForDirectionalPlacement(placementSide))
             {
-                // 不潛行時，強制向下
+                // 潛行且對著側面放置：漏嘴朝向該側面的相對面
+                int hopperMetadata = getOppositeDirection(placementSide);
+                world.setBlockMetadataWithNotify(x, y, z, hopperMetadata, 2);
+            }
+            else
+            {
+                // 不潛行或其他情況：默認向下
                 world.setBlockMetadataWithNotify(x, y, z, 0, 2);
             }
-            // 如果潛行，使用 onBlockPlaced 中設置的朝向
         }
         else
         {
             // 非玩家放置，默認向下
             world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+        }
+    }
+
+    /**
+     * 檢查是否為有效的側面（不是頂面或底面）
+     */
+    private boolean isValidSideForDirectionalPlacement(int side)
+    {
+        return side >= 2 && side <= 5; // 2,3,4,5 分別是北、南、西、東面
+    }
+
+    /**
+     * 獲取相對面的方向
+     * 對著北面放置 → 漏嘴朝南 (2 → 3)
+     * 對著南面放置 → 漏嘴朝北 (3 → 2)
+     * 對著西面放置 → 漏嘴朝東 (4 → 5)
+     * 對著東面放置 → 漏嘴朝西 (5 → 4)
+     */
+    private int getOppositeDirection(int side)
+    {
+        switch (side)
+        {
+            case 2: // 北面 → 漏嘴朝南
+                return 3;
+            case 3: // 南面 → 漏嘴朝北
+                return 2;
+            case 4: // 西面 → 漏嘴朝東
+                return 5;
+            case 5: // 東面 → 漏嘴朝西
+                return 4;
+            default:
+                return 0; // 默認向下
         }
     }
 
