@@ -1,4 +1,4 @@
-package com.example.goldenhopper;
+package com.example.morehoppers;
 
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -16,17 +16,18 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-@Mod(modid = GoldenHopper.MODID, version = GoldenHopper.VERSION)
-public class GoldenHopper
+@Mod(modid = MoreHoppersMod.MODID, version = MoreHoppersMod.VERSION)
+public class MoreHoppersMod
 {
-    public static final String MODID = "goldenhopper";
+    public static final String MODID = "morehoppers";
     public static final String VERSION = "1.0";
 
-    @Instance(GoldenHopper.MODID)
-    public static GoldenHopper instance;
+    @Instance(MoreHoppersMod.MODID)
+    public static MoreHoppersMod instance;
 
     public static Block goldenHopperBlock;
-    public static CreativeTabs goldenHopperTab = new CreativeTabs("goldenhopper") {
+    public static Block diamondHopperBlock;
+    public static CreativeTabs moreHoppersTab = new CreativeTabs("morehoppers") {
         @Override
         public Item getTabIconItem() {
             return Item.getItemFromBlock(goldenHopperBlock);
@@ -39,9 +40,12 @@ public class GoldenHopper
         // 註冊方塊
         goldenHopperBlock = new BlockGoldenHopper();
         GameRegistry.registerBlock(goldenHopperBlock, ItemGoldenHopper.class, "golden_hopper");
+        diamondHopperBlock = new BlockDiamondHopper();
+        GameRegistry.registerBlock(diamondHopperBlock, ItemDiamondHopper.class, "diamond_hopper");
 
         // 註冊TileEntity
         GameRegistry.registerTileEntity(TileEntityGoldenHopper.class, "GoldenHopper");
+        GameRegistry.registerTileEntity(TileEntityDiamondHopper.class, "DiamondHopper"); // 新增
     }
 
     @EventHandler
@@ -53,7 +57,8 @@ public class GoldenHopper
         // 只在客戶端初始化渲染器
         if (event.getSide() == Side.CLIENT)
         {
-            new GoldenHopperRenderer();
+            // 使用通用渲染器替代原來的 GoldenHopperRenderer
+            new UniversalHopperRenderer();
         }
         addRecipes();
 
@@ -67,6 +72,14 @@ public class GoldenHopper
                 'G', Items.gold_ingot,
                 'H', Blocks.hopper
         );
+        GameRegistry.addRecipe(new ItemStack(diamondHopperBlock, 1),
+                "D D",
+                "DHD",
+                " D ",
+                'D', Items.diamond,
+                'H', Blocks.hopper
+        );
+
     }
 
     @EventHandler

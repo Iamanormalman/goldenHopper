@@ -1,4 +1,4 @@
-package com.example.goldenhopper;
+package com.example.morehoppers;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -6,11 +6,11 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class ContainerGoldenHopper extends Container
+public class ContainerDiamondHopper extends Container
 {
-    private final TileEntityGoldenHopper hopperInventory;
+    private final TileEntityDiamondHopper hopperInventory;
 
-    public ContainerGoldenHopper(InventoryPlayer playerInventory, TileEntityGoldenHopper hopperInventory)
+    public ContainerDiamondHopper(InventoryPlayer playerInventory, TileEntityDiamondHopper hopperInventory)
     {
         this.hopperInventory = hopperInventory;
         hopperInventory.openInventory();

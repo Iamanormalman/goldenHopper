@@ -1,15 +1,15 @@
 [
 {
-  "modid": "goldenhopper",
-  "name": "Golden Hopper",
-  "description": "This mod adds a golden hopper which transfer 1 item per tick",
+  "modid": "morehoppers",
+  "name": "More Hoppers",
+  "description": "This mod adds several hoppers which transfer items faster",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
+  "authorList": ["Iamanormalman"],
+  "credits": "Claude AI",
+  "logoFile": "assets/goldenhopper/textures/golden_hopper_logo.png",
   "screenshots": [],
   "dependencies": []
 }

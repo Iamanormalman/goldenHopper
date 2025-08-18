@@ -1,4 +1,4 @@
-package com.example.goldenhopper;
+package com.example.morehoppers;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,17 +12,27 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-
 import java.util.List;
 
-public class TileEntityGoldenHopper extends TileEntity implements IInventory, ISidedInventory
+
+/**
+ * 所有自訂漏斗 TileEntity 的基礎類別
+ */
+public abstract class TileEntityBaseHopper extends TileEntity implements IInventory, ISidedInventory
 {
     private ItemStack[] hopperItemStacks = new ItemStack[5];
     private String customName;
-    private int transferCooldown = 0; // 初始化為0而不是-1
+    private int transferCooldown = 0;
 
-    // 黃金漏斗每tick轉移一個物品（比原版快5倍）
-    private static final int TRANSFER_COOLDOWN = 2;
+    /**
+     * 子類必須實現此方法以提供不同的傳輸冷卻時間
+     */
+    protected abstract int getTransferCooldown();
+
+    /**
+     * 子類必須實現此方法以提供容器名稱
+     */
+    protected abstract String getContainerName();
 
     @Override
     public void readFromNBT(NBTTagCompound nbt)
@@ -91,7 +101,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         }
     }
 
-    private boolean updateHopper()
+    private void updateHopper()
     {
         if (this.worldObj != null && !this.worldObj.isRemote)
         {
@@ -111,14 +121,11 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
 
                 if (flag)
                 {
-                    this.setTransferCooldown(TRANSFER_COOLDOWN);
+                    this.setTransferCooldown(getTransferCooldown());
                     this.markDirty();
-                    return true;
                 }
             }
-
         }
-        return false;
     }
 
     private boolean isEmpty()
@@ -151,14 +158,13 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
 
         if (targetInventory != null) {
             int facing = this.getBlockMetadata() & 7;
-            // 修正面向邏輯
             int insertSide = -1;
-            if (facing == 0) // 向下
+            if (facing == 0)
             {
-                insertSide = 1; // 底面
-            } else if (facing >= 2 && facing <= 5) // 水平方向
+                insertSide = 1;
+            } else if (facing >= 2 && facing <= 5)
             {
-                insertSide = facing; // 對應的側面
+                insertSide = facing;
             }
 
             if (!this.isInventoryFull(targetInventory, insertSide)) {
@@ -173,17 +179,15 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
                             return true;
                         }
 
-                        // 如果無法插入，恢復原始物品
                         this.setInventorySlotContents(i, originalStack);
                     }
                 }
-
             }
         }
         return false;
     }
 
-    private static boolean suckItemsIntoHopper(TileEntityGoldenHopper hopper)
+    private static boolean suckItemsIntoHopper(TileEntityBaseHopper hopper)
     {
         IInventory sourceInventory = getSourceInventory(hopper);
 
@@ -231,7 +235,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         return false;
     }
 
-    private static boolean pullItemFromSlot(TileEntityGoldenHopper hopper, IInventory inventory, int slot, int side)
+    private static boolean pullItemFromSlot(TileEntityBaseHopper hopper, IInventory inventory, int slot, int side)
     {
         ItemStack itemstack = inventory.getStackInSlot(slot);
 
@@ -252,7 +256,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         return false;
     }
 
-    public static boolean captureDroppedItems(TileEntityGoldenHopper hopper, EntityItem entityItem)
+    public static boolean captureDroppedItems(TileEntityBaseHopper hopper, EntityItem entityItem)
     {
         boolean flag = false;
 
@@ -446,13 +450,13 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
 
             if (flag)
             {
-                if (inventory instanceof TileEntityGoldenHopper)
+                if (inventory instanceof TileEntityBaseHopper)
                 {
-                    TileEntityGoldenHopper tileentityhopper1 = (TileEntityGoldenHopper)inventory;
+                    TileEntityBaseHopper tileentityhopper1 = (TileEntityBaseHopper) inventory;
 
                     if (tileentityhopper1.mayTransfer())
                     {
-                        tileentityhopper1.setTransferCooldown(TRANSFER_COOLDOWN);
+                        tileentityhopper1.setTransferCooldown(tileentityhopper1.getTransferCooldown());
                     }
 
                     inventory.markDirty();
@@ -494,7 +498,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         return getInventoryAtLocation(this.worldObj, i, j, k);
     }
 
-    public static IInventory getSourceInventory(TileEntityGoldenHopper hopper)
+    public static IInventory getSourceInventory(TileEntityBaseHopper hopper)
     {
         return getInventoryAtLocation(hopper.getWorldObj(), hopper.xCoord, hopper.yCoord + 1.0D, hopper.zCoord);
     }
@@ -510,7 +514,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         int blockZ = MathHelper.floor_double(z);
         TileEntity tileEntity = world.getTileEntity(blockX, blockY, blockZ);
 
-        if (tileEntity != null && tileEntity instanceof IInventory)
+        if (tileEntity instanceof IInventory)
         {
             inventory = (IInventory)tileEntity;
 
@@ -548,7 +552,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
         return inventory;
     }
 
-    public static List<EntityItem> getItemsAboveHopper(TileEntityGoldenHopper hopper)
+    public static List<EntityItem> getItemsAboveHopper(TileEntityBaseHopper hopper)
     {
         return hopper.worldObj.getEntitiesWithinAABB(EntityItem.class,
                 AxisAlignedBB.getBoundingBox(hopper.xCoord, hopper.yCoord + 1.0D, hopper.zCoord,
@@ -683,7 +687,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
     @Override
     public String getInventoryName()
     {
-        return this.hasCustomInventoryName() ? this.customName : "container.goldenhopper";
+        return this.hasCustomInventoryName() ? this.customName : getContainerName();
     }
 
     @Override

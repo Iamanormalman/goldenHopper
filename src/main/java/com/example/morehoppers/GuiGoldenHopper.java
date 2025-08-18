@@ -1,4 +1,4 @@
-package com.example.goldenhopper;
+package com.example.morehoppers;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11;
 @SideOnly(Side.CLIENT)
 public class GuiGoldenHopper extends GuiContainer
 {
-    private static final ResourceLocation hopperGuiTextures = new ResourceLocation(GoldenHopper.MODID + ":textures/gui/container/golden_hopper.png");
+    private static final ResourceLocation hopperGuiTextures = new ResourceLocation(MoreHoppersMod.MODID + ":textures/gui/container/golden_hopper.png");
     private final TileEntityGoldenHopper hopperInventory;
     private final InventoryPlayer playerInventory;
 
