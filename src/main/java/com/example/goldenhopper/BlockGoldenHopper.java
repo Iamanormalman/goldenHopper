@@ -260,6 +260,12 @@ public class BlockGoldenHopper extends BlockContainer
     }
 
     @Override
+    public boolean isSideSolid(IBlockAccess world, int x, int y, int z, net.minecraftforge.common.util.ForgeDirection side)
+    {
+        return side == net.minecraftforge.common.util.ForgeDirection.UP;
+    }
+
+    @Override
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side)
     {
