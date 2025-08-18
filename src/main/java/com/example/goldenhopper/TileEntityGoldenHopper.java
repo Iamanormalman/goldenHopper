@@ -117,12 +117,8 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
                 }
             }
 
-            return false;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     private boolean isEmpty()
@@ -153,40 +149,26 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
     {
         IInventory targetInventory = this.getInventoryForHopperTransfer();
 
-        if (targetInventory == null)
-        {
-            return false;
-        }
-        else
-        {
+        if (targetInventory != null) {
             int facing = this.getBlockMetadata() & 7;
             // 修正面向邏輯
             int insertSide = -1;
             if (facing == 0) // 向下
             {
                 insertSide = 1; // 底面
-            }
-            else if (facing >= 2 && facing <= 5) // 水平方向
+            } else if (facing >= 2 && facing <= 5) // 水平方向
             {
                 insertSide = facing; // 對應的側面
             }
 
-            if (this.isInventoryFull(targetInventory, insertSide))
-            {
-                return false;
-            }
-            else
-            {
-                for (int i = 0; i < this.getSizeInventory(); ++i)
-                {
-                    if (this.getStackInSlot(i) != null)
-                    {
+            if (!this.isInventoryFull(targetInventory, insertSide)) {
+                for (int i = 0; i < this.getSizeInventory(); ++i) {
+                    if (this.getStackInSlot(i) != null) {
                         ItemStack originalStack = this.getStackInSlot(i).copy();
                         ItemStack stackToTransfer = this.decrStackSize(i, 1);
                         ItemStack remainingStack = insertStack(targetInventory, stackToTransfer, insertSide);
 
-                        if (remainingStack == null || remainingStack.stackSize == 0)
-                        {
+                        if (remainingStack == null || remainingStack.stackSize == 0) {
                             targetInventory.markDirty();
                             return true;
                         }
@@ -196,9 +178,9 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
                     }
                 }
 
-                return false;
             }
         }
+        return false;
     }
 
     private static boolean suckItemsIntoHopper(TileEntityGoldenHopper hopper)
@@ -550,7 +532,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
             List entityList = world.getEntitiesWithinAABBExcludingEntity(null,
                     AxisAlignedBB.getBoundingBox(x, y, z, x + 1.0D, y + 1.0D, z + 1.0D));
 
-            if (entityList != null && entityList.size() > 0)
+            if (entityList != null && !entityList.isEmpty())
             {
                 for (Object entity : entityList)
                 {
@@ -585,12 +567,10 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
             ISidedInventory isidedinventory = (ISidedInventory)inventory;
             int[] aint = isidedinventory.getAccessibleSlotsFromSide(side);
 
-            for (int l = 0; l < aint.length; ++l)
-            {
-                ItemStack itemstack1 = isidedinventory.getStackInSlot(aint[l]);
+            for (int i : aint) {
+                ItemStack itemstack1 = isidedinventory.getStackInSlot(i);
 
-                if (itemstack1 == null || itemstack1.stackSize != itemstack1.getMaxStackSize())
-                {
+                if (itemstack1 == null || itemstack1.stackSize != itemstack1.getMaxStackSize()) {
                     return false;
                 }
             }
@@ -652,8 +632,6 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
             {
                 itemstack = this.hopperItemStacks[slot];
                 this.hopperItemStacks[slot] = null;
-                this.markDirty();
-                return itemstack;
             }
             else
             {
@@ -664,9 +642,9 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
                     this.hopperItemStacks[slot] = null;
                 }
 
-                this.markDirty();
-                return itemstack;
             }
+            this.markDirty();
+            return itemstack;
         }
         else
         {
@@ -711,7 +689,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
     @Override
     public boolean hasCustomInventoryName()
     {
-        return this.customName != null && this.customName.length() > 0;
+        return this.customName != null && !this.customName.isEmpty();
     }
 
     public void setCustomName(String customName)

@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 
 public class ContainerGoldenHopper extends Container
 {
-    private TileEntityGoldenHopper hopperInventory;
+    private final TileEntityGoldenHopper hopperInventory;
 
     public ContainerGoldenHopper(InventoryPlayer playerInventory, TileEntityGoldenHopper hopperInventory)
     {
@@ -73,7 +73,7 @@ public class ContainerGoldenHopper extends Container
 
             if (itemstack1.stackSize == 0)
             {
-                slot.putStack((ItemStack)null);
+                slot.putStack(null);
             }
             else
             {

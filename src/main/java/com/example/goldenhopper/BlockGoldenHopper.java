@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import java.util.Random;
@@ -157,19 +158,13 @@ public class BlockGoldenHopper extends BlockContainer
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ)
     {
-        if (world.isRemote)
-        {
-            return true;
-        }
-        else
-        {
+        if (!world.isRemote) {
             TileEntity tileEntity = world.getTileEntity(x, y, z);
-            if (tileEntity instanceof TileEntityGoldenHopper)
-            {
+            if (tileEntity instanceof TileEntityGoldenHopper) {
                 player.openGui(GoldenHopper.instance, GuiHandler.GOLDEN_HOPPER_GUI_ID, world, x, y, z);
             }
-            return true;
         }
+        return true;
     }
 
     @Override
@@ -201,7 +196,7 @@ public class BlockGoldenHopper extends BlockContainer
                         }
 
                         itemstack.stackSize -= j;
-                        EntityItem entityitem = new EntityItem(world, (double)((float)x + f), (double)((float)y + f1), (double)((float)z + f2), new ItemStack(itemstack.getItem(), j, itemstack.getItemDamage()));
+                        EntityItem entityitem = new EntityItem(world, (float)x + f, (float)y + f1, (float)z + f2, new ItemStack(itemstack.getItem(), j, itemstack.getItemDamage()));
 
                         if (itemstack.hasTagCompound())
                         {
@@ -209,9 +204,9 @@ public class BlockGoldenHopper extends BlockContainer
                         }
 
                         float f3 = 0.05F;
-                        entityitem.motionX = (double)((float)this.hopperRandom.nextGaussian() * f3);
-                        entityitem.motionY = (double)((float)this.hopperRandom.nextGaussian() * f3 + 0.2F);
-                        entityitem.motionZ = (double)((float)this.hopperRandom.nextGaussian() * f3);
+                        entityitem.motionX = (float)this.hopperRandom.nextGaussian() * f3;
+                        entityitem.motionY = (float)this.hopperRandom.nextGaussian() * f3 + 0.2F;
+                        entityitem.motionZ = (float)this.hopperRandom.nextGaussian() * f3;
                         world.spawnEntityInWorld(entityitem);
                     }
                 }
@@ -223,7 +218,7 @@ public class BlockGoldenHopper extends BlockContainer
         super.onBlockPreDestroy(world, x, y, z, metadata);
     }
 
-    private Random hopperRandom = new Random();
+    private final Random hopperRandom = new Random();
 
     @Override
     public boolean hasComparatorInputOverride()
@@ -262,6 +257,15 @@ public class BlockGoldenHopper extends BlockContainer
     public boolean renderAsNormalBlock()
     {
         return false;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side)
+    {
+        // 對於黃金漏斗，總是渲染所有面以確保正確顯示
+        // 這解決了底面透明的問題
+        return true;
     }
 
     @Override

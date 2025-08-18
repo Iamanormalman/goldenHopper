@@ -31,16 +31,21 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
             return false;
 
         BlockGoldenHopper goldenHopper = (BlockGoldenHopper) block;
-        renderBlockGoldenHopper(renderer, goldenHopper, x, y, z);
 
-        // 重置渲染邊界
+        // 設置渲染邊界和顏色
         renderer.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-        Tessellator.instance.setColorOpaque_F(1.0F, 1.0F, 1.0F);
 
-        // 渲染原版漏斗作為基礎（這行可能需要根據您的需求調整）
-        // renderer.renderStandardBlock(Blocks.hopper, x, y, z);
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
 
-        return true;
+        // 調用渲染方法
+        boolean result = renderBlockGoldenHopper(renderer, goldenHopper, x, y, z);
+
+        // 重置渲染邊界和顏色
+        renderer.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+        tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
+
+        return result;
     }
 
     public int getRenderId()
@@ -120,7 +125,8 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         }
         else
         {
-            // 世界渲染
+            // **修復：世界渲染 - 不要手動操作 Tessellator**
+            // 使用 renderStandardBlock，它會正確處理 Tessellator 狀態
             renderer.renderStandardBlock(goldenHopper, x, y, z);
         }
 
@@ -148,14 +154,15 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         }
 
         // 獲取材質圖標
-        IIcon outsideIcon = goldenHopper.getIcon(2, 0); // 使用outside材質
-        IIcon insideIcon = goldenHopper.getHopperInsideIcon(); // 使用inside材質
+        IIcon outsideIcon = goldenHopper.getIcon(2, 0);
+        IIcon insideIcon = goldenHopper.getHopperInsideIcon();
 
         float wallThickness = 0.125F;
 
         // 渲染漏斗壁面
         if (isInventory)
         {
+            // 庫存渲染的漏斗壁面
             tessellator.startDrawingQuads();
             tessellator.setNormal(1.0F, 0.0F, 0.0F);
             renderer.renderFaceXPos(goldenHopper, (-1.0F + wallThickness), 0.0D, 0.0D, outsideIcon);
@@ -183,6 +190,7 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         }
         else
         {
+            // **修復：世界渲染 - 使用 renderFace 方法而不是手動操作 Tessellator**
             renderer.renderFaceXPos(goldenHopper, (x - 1.0F + wallThickness), y, z, outsideIcon);
             renderer.renderFaceXNeg(goldenHopper, (x + 1.0F - wallThickness), y, z, outsideIcon);
             renderer.renderFaceZPos(goldenHopper, x, y, (z - 1.0F + wallThickness), outsideIcon);
@@ -200,6 +208,7 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         // 渲染內部錐形
         if (isInventory)
         {
+            // 庫存渲染的內部錐形
             tessellator.startDrawingQuads();
             tessellator.setNormal(1.0F, 0.0F, 0.0F);
             renderer.renderFaceXPos(goldenHopper, 0.0D, 0.0D, 0.0D, outsideIcon);
@@ -232,6 +241,7 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         }
         else
         {
+            // **修復：世界渲染 - 使用 renderStandardBlock 而不是手動操作 Tessellator**
             renderer.renderStandardBlock(goldenHopper, x, y, z);
         }
 

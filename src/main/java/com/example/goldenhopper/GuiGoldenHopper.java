@@ -5,7 +5,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -13,8 +12,8 @@ import org.lwjgl.opengl.GL11;
 public class GuiGoldenHopper extends GuiContainer
 {
     private static final ResourceLocation hopperGuiTextures = new ResourceLocation(GoldenHopper.MODID + ":textures/gui/container/golden_hopper.png");
-    private TileEntityGoldenHopper hopperInventory;
-    private InventoryPlayer playerInventory;
+    private final TileEntityGoldenHopper hopperInventory;
+    private final InventoryPlayer playerInventory;
 
     public GuiGoldenHopper(InventoryPlayer playerInventory, TileEntityGoldenHopper hopperInventory)
     {
@@ -30,9 +29,9 @@ public class GuiGoldenHopper extends GuiContainer
      */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        String s = this.hopperInventory.hasCustomInventoryName() ? this.hopperInventory.getInventoryName() : I18n.format(this.hopperInventory.getInventoryName(), new Object[0]);
+        String s = this.hopperInventory.hasCustomInventoryName() ? this.hopperInventory.getInventoryName() : I18n.format(this.hopperInventory.getInventoryName());
         this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
-        this.fontRendererObj.drawString(this.playerInventory.hasCustomInventoryName() ? this.playerInventory.getInventoryName() : I18n.format(this.playerInventory.getInventoryName(), new Object[0]), 8, this.ySize - 96 + 2, 4210752);
+        this.fontRendererObj.drawString(this.playerInventory.hasCustomInventoryName() ? this.playerInventory.getInventoryName() : I18n.format(this.playerInventory.getInventoryName()), 8, this.ySize - 96 + 2, 4210752);
     }
 
     /**
