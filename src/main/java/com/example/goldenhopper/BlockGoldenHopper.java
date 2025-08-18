@@ -5,7 +5,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +32,7 @@ public class BlockGoldenHopper extends BlockContainer
     {
         super(Material.iron);
         this.setBlockName("golden_hopper");
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+        this.setCreativeTab(GoldenHopper.goldenHopperTab);
         this.setHardness(3.0F);
         this.setResistance(8.0F);
         this.setStepSound(soundTypeMetal);
@@ -54,9 +53,7 @@ public class BlockGoldenHopper extends BlockContainer
         this.topIcon = iconRegister.registerIcon(GoldenHopper.MODID + ":golden_hopper_top");
         this.insideIcon = iconRegister.registerIcon(GoldenHopper.MODID + ":golden_hopper_inside");
         this.outsideIcon = iconRegister.registerIcon(GoldenHopper.MODID + ":golden_hopper_outside");
-
-        // 設置blockIcon為outside材質（用於掉落物品等）
-        this.blockIcon = this.outsideIcon;
+        this.blockIcon = iconRegister.registerIcon(GoldenHopper.MODID + ":golden_hopper");
     }
 
     @Override
@@ -67,6 +64,13 @@ public class BlockGoldenHopper extends BlockContainer
         // side 1 = 頂部使用top材質
         // 其他所有側面使用outside材質
         return side == 1 ? this.topIcon : this.outsideIcon;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
+    {
+        return this.getIcon(side, world.getBlockMetadata(x, y, z));
     }
 
     // 如果你想要漏斗內部使用不同貼圖，可以覆蓋這個方法

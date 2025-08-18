@@ -24,19 +24,22 @@ public class GuiGoldenHopper extends GuiContainer
         this.ySize = 133;
     }
 
-    /**
-     * 畫出前景層（文字等）
-     */
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        String s = this.hopperInventory.hasCustomInventoryName() ? this.hopperInventory.getInventoryName() : I18n.format(this.hopperInventory.getInventoryName());
-        this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
-        this.fontRendererObj.drawString(this.playerInventory.hasCustomInventoryName() ? this.playerInventory.getInventoryName() : I18n.format(this.playerInventory.getInventoryName()), 8, this.ySize - 96 + 2, 4210752);
+        String s = this.hopperInventory.hasCustomInventoryName()
+                ? this.hopperInventory.getInventoryName()
+                : I18n.format(this.hopperInventory.getInventoryName());
+
+        this.fontRendererObj.drawString(s, 8, 6, 4210752);
+
+        this.fontRendererObj.drawString(
+                this.playerInventory.hasCustomInventoryName()
+                        ? this.playerInventory.getInventoryName()
+                        : I18n.format(this.playerInventory.getInventoryName()),
+                8, this.ySize - 96 + 2, 4210752
+        );
     }
 
-    /**
-     * 畫出背景層（容器背景）
-     */
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
