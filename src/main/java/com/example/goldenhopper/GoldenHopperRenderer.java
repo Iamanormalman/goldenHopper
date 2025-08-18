@@ -22,18 +22,7 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
 
     public void renderInventoryBlock(Block block, int metadata, int modelID, RenderBlocks renderer)
     {
-        // 庫存中渲染Golden Hopper
-        if (!(block instanceof BlockGoldenHopper))
-            return;
-
-        BlockGoldenHopper goldenHopper = (BlockGoldenHopper) block;
-
-        Tessellator tessellator = Tessellator.instance;
-        renderer.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-        tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
-
-        // 渲染庫存中的Golden Hopper，metadata設為0（向下）
-        renderBlockGoldenHopperMetadata(renderer, goldenHopper, 0, 0, 0, 0, true);
+        // 庫存中不渲染，保持空白如參考代碼
     }
 
     public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
@@ -47,6 +36,9 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         // 重置渲染邊界
         renderer.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
         Tessellator.instance.setColorOpaque_F(1.0F, 1.0F, 1.0F);
+
+        // 渲染原版漏斗作為基礎（這行可能需要根據您的需求調整）
+        // renderer.renderStandardBlock(Blocks.hopper, x, y, z);
 
         return true;
     }
@@ -79,26 +71,23 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
 
         tessellator.setColorOpaque_F(f * f1, f * f2, f * f3);
 
-        // 獲取方塊的metadata（決定漏斗朝向）
-        int metadata = renderer.blockAccess.getBlockMetadata(x, y, z);
-
-        return renderBlockGoldenHopperMetadata(renderer, goldenHopper, x, y, z, metadata, false);
+        return renderBlockGoldenHopperMetadata(renderer, goldenHopper, x, y, z,
+                renderer.blockAccess.getBlockMetadata(x, y, z), false);
     }
 
-    public boolean renderBlockGoldenHopperMetadata(RenderBlocks renderer, BlockGoldenHopper goldenHopper, int x, int y, int z, int metadata, boolean isInventory)
+    public boolean renderBlockGoldenHopperMetadata(RenderBlocks renderer, BlockGoldenHopper goldenHopper,
+                                                   int x, int y, int z, int metadata, boolean isInventory)
     {
         Tessellator tessellator = Tessellator.instance;
-
-        // 使用與原版漏斗相同的朝向邏輯
         int direction = BlockHopper.getDirectionFromMetadata(metadata);
-        double hopperHeight = 0.625D; // 10/16 方塊高度
+        double hopperHeight = 0.625D; // 10/16
 
         // 設置主漏斗體的邊界
         renderer.setRenderBounds(0.0D, hopperHeight, 0.0D, 1.0D, 1.0D, 1.0D);
 
-        // 庫存渲染 - 使用簡化的渲染方式
         if (isInventory)
         {
+            // 庫存渲染 - 渲染所有六個面
             tessellator.startDrawingQuads();
             tessellator.setNormal(0.0F, -1.0F, 0.0F);
             renderer.renderFaceYNeg(goldenHopper, 0.0D, 0.0D, 0.0D, goldenHopper.getIcon(0, metadata));
@@ -135,7 +124,7 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
             renderer.renderStandardBlock(goldenHopper, x, y, z);
         }
 
-        // 設置顏色和亮度
+        // 設置亮度和顏色（僅世界渲染）
         if (!isInventory)
         {
             tessellator.setBrightness(goldenHopper.getMixedBrightnessForBlock(renderer.blockAccess, x, y, z));
@@ -158,16 +147,15 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
             tessellator.setColorOpaque_F(f1 * f4, f1 * f2, f1 * f3);
         }
 
-        // 獲取Golden Hopper的材質圖標（關鍵修改點）
-        IIcon outsideIcon = goldenHopper.getIcon(2, 0); // 使用我們的outside材質
-        IIcon insideIcon = goldenHopper.getHopperInsideIcon(); // 使用我們的inside材質
+        // 獲取材質圖標
+        IIcon outsideIcon = goldenHopper.getIcon(2, 0); // 使用outside材質
+        IIcon insideIcon = goldenHopper.getHopperInsideIcon(); // 使用inside材質
 
-        float wallThickness = 0.125F; // 2/16 的壁厚
+        float wallThickness = 0.125F;
 
         // 渲染漏斗壁面
         if (isInventory)
         {
-            // 庫存中渲染漏斗壁面
             tessellator.startDrawingQuads();
             tessellator.setNormal(1.0F, 0.0F, 0.0F);
             renderer.renderFaceXPos(goldenHopper, (-1.0F + wallThickness), 0.0D, 0.0D, outsideIcon);
@@ -195,7 +183,6 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
         }
         else
         {
-            // 世界中渲染漏斗壁面
             renderer.renderFaceXPos(goldenHopper, (x - 1.0F + wallThickness), y, z, outsideIcon);
             renderer.renderFaceXNeg(goldenHopper, (x + 1.0F - wallThickness), y, z, outsideIcon);
             renderer.renderFaceZPos(goldenHopper, x, y, (z - 1.0F + wallThickness), outsideIcon);
@@ -203,17 +190,16 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
             renderer.renderFaceYPos(goldenHopper, x, (y - 1.0F) + hopperHeight, z, insideIcon);
         }
 
-        // 設置當前圖標為outside材質
+        // 設置材質覆蓋
         renderer.setOverrideBlockTexture(outsideIcon);
 
-        // 渲染漏斗內部錐形
-        double innerTopSize = 0.25D; // 4/16
-        double innerBottomSize = 0.25D; // 4/16
-        renderer.setRenderBounds(innerTopSize, innerBottomSize, innerTopSize, 1.0D - innerTopSize, hopperHeight - 0.002D, 1.0D - innerTopSize);
+        double innerSize1 = 0.25D;
+        double innerSize2 = 0.25D;
+        renderer.setRenderBounds(innerSize1, innerSize2, innerSize1, 1.0D - innerSize1, hopperHeight - 0.002D, 1.0D - innerSize1);
 
+        // 渲染內部錐形
         if (isInventory)
         {
-            // 庫存中渲染內部錐形的六個面
             tessellator.startDrawingQuads();
             tessellator.setNormal(1.0F, 0.0F, 0.0F);
             renderer.renderFaceXPos(goldenHopper, 0.0D, 0.0D, 0.0D, outsideIcon);
@@ -249,15 +235,14 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
             renderer.renderStandardBlock(goldenHopper, x, y, z);
         }
 
-        // 渲染漏嘴（根據朝向）
+        // 渲染漏嘴（僅世界渲染）
         if (!isInventory)
         {
-            double spoutSize = 0.375D; // 6/16
-            double spoutLength = 0.25D; // 4/16
+            double spoutSize = 0.375D;
+            double spoutLength = 0.25D;
 
             renderer.setOverrideBlockTexture(outsideIcon);
 
-            // 根據朝向渲染漏嘴
             if (direction == 0) // 向下
             {
                 renderer.setRenderBounds(spoutSize, 0.0D, spoutSize, 1.0D - spoutSize, 0.25D, 1.0D - spoutSize);
@@ -265,22 +250,22 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
             }
             else if (direction == 2) // 向北
             {
-                renderer.setRenderBounds(spoutSize, innerBottomSize, 0.0D, 1.0D - spoutSize, innerBottomSize + spoutLength, innerTopSize);
+                renderer.setRenderBounds(spoutSize, innerSize2, 0.0D, 1.0D - spoutSize, innerSize2 + spoutLength, innerSize1);
                 renderer.renderStandardBlock(goldenHopper, x, y, z);
             }
             else if (direction == 3) // 向南
             {
-                renderer.setRenderBounds(spoutSize, innerBottomSize, 1.0D - innerTopSize, 1.0D - spoutSize, innerBottomSize + spoutLength, 1.0D);
+                renderer.setRenderBounds(spoutSize, innerSize2, 1.0D - innerSize1, 1.0D - spoutSize, innerSize2 + spoutLength, 1.0D);
                 renderer.renderStandardBlock(goldenHopper, x, y, z);
             }
             else if (direction == 4) // 向西
             {
-                renderer.setRenderBounds(0.0D, innerBottomSize, spoutSize, innerTopSize, innerBottomSize + spoutLength, 1.0D - spoutSize);
+                renderer.setRenderBounds(0.0D, innerSize2, spoutSize, innerSize1, innerSize2 + spoutLength, 1.0D - spoutSize);
                 renderer.renderStandardBlock(goldenHopper, x, y, z);
             }
             else if (direction == 5) // 向東
             {
-                renderer.setRenderBounds(1.0D - innerTopSize, innerBottomSize, spoutSize, 1.0D, innerBottomSize + spoutLength, 1.0D - spoutSize);
+                renderer.setRenderBounds(1.0D - innerSize1, innerSize2, spoutSize, 1.0D, innerSize2 + spoutLength, 1.0D - spoutSize);
                 renderer.renderStandardBlock(goldenHopper, x, y, z);
             }
         }
@@ -293,6 +278,6 @@ public class GoldenHopperRenderer implements ISimpleBlockRenderingHandler
 
     public boolean shouldRender3DInInventory(int modelId)
     {
-        return true; // 改為true以在庫存中顯示3D模型
+        return false; // 與參考代碼保持一致
     }
 }
