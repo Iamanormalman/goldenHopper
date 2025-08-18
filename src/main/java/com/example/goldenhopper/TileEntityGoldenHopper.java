@@ -22,7 +22,7 @@ public class TileEntityGoldenHopper extends TileEntity implements IInventory, IS
     private int transferCooldown = 0; // 初始化為0而不是-1
 
     // 黃金漏斗每tick轉移一個物品（比原版快5倍）
-    private static final int TRANSFER_COOLDOWN = 1;
+    private static final int TRANSFER_COOLDOWN = 2;
 
     @Override
     public void readFromNBT(NBTTagCompound nbt)
